@@ -13,7 +13,7 @@
         align-items: center;
       }
       canvas {
-        background-color: white;
+        background-color: black;
       }
     </style>
   </head>
@@ -25,5 +25,7 @@
   <script type="module">
     import init from "./out/bevy_player_move.js";
     init();
+
+    document.getElementById("game").focus();
   </script>
 </html>
