@@ -1,4 +1,6 @@
-# Bevy Player Move
+# Bevy Basic Player
+
+Move with left and right arrows, press shift to run.
 
 If you're learning, make sure to check out the commit history.
 
