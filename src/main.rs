@@ -71,7 +71,7 @@ fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
         transform: Transform {
             translation: Vec3::new(0., 0., 0.),
             ..Default::default()
-        }, // the SpriteSheet Bundle gives the `Transform` component, that's why we can use it in line 55
+        }, // the SpriteSheet Bundle gives the `Transform` component, that's why we can use it in line 94
         sprite: TextureAtlasSprite::new(0), // `sprite` here is the default image to show while not playing an animation.
         texture_atlas: assets.animations.clone(),
         ..Default::default()
