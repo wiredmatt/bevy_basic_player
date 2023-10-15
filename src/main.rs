@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
-use bevy_pixel_camera::PixelCameraPlugin;
+use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
 
 #[derive(AssetCollection, Resource)]
 pub struct PlayerAssets {
@@ -29,5 +29,30 @@ fn main() {
         .add_collection_to_loading_state::<_, PlayerAssets>(GameState::Loading)
         .add_plugins(DefaultPlugins)
         .add_plugins(PixelCameraPlugin)
+        .add_systems(OnEnter(GameState::Next), setup)
         .run();
+}
+
+fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
+    commands.spawn(PixelCameraBundle::from_resolution(320, 240, true));
+
+    commands.spawn(SpriteSheetBundle {
+        transform: Transform {
+            translation: Vec3::new(0., 0., 0.),
+            ..Default::default()
+        }, // the SpriteSheet Bundle gives the `Transform` component, that's why we can use it in line 55
+        sprite: TextureAtlasSprite::new(0), // `sprite` here is the default image to show while not playing an animation.
+        texture_atlas: assets.animations.clone(),
+        ..Default::default()
+    });
+
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            color: Color::rgb(0., 0., 0.),
+            custom_size: Some(Vec2::new(1000.0, 10.0)),
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(0., -15., 0.)),
+        ..default()
+    });
 }
