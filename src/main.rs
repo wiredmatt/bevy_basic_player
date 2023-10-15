@@ -15,6 +15,27 @@ pub struct PlayerAssets {
     animations: Handle<TextureAtlas>,
 }
 
+#[derive(Component)]
+struct Player {
+    state: PlayerState,
+    facing: Direction,
+} // `Player` will act as a Tag, for us to identify its entity.
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Default)]
+enum Direction {
+    #[default]
+    Right,
+    Left,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Default)]
+enum PlayerState {
+    #[default]
+    Idle,
+    Walk,
+    Run,
+}
+
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 enum GameState {
     #[default]
@@ -36,7 +57,10 @@ fn main() {
 fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
     commands.spawn(PixelCameraBundle::from_resolution(320, 240, true));
 
-    commands.spawn(SpriteSheetBundle {
+    commands.spawn((Player {
+        state: PlayerState::Idle,
+        facing: Direction::Right
+    },SpriteSheetBundle {
         transform: Transform {
             translation: Vec3::new(0., 0., 0.),
             ..Default::default()
@@ -44,7 +68,7 @@ fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
         sprite: TextureAtlasSprite::new(0), // `sprite` here is the default image to show while not playing an animation.
         texture_atlas: assets.animations.clone(),
         ..Default::default()
-    });
+    }));
 
     commands.spawn(SpriteBundle {
         sprite: Sprite {
