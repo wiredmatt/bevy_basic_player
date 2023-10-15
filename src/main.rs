@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    window::{PresentMode, WindowMode},
+};
 use bevy_asset_loader::prelude::*;
 use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
 
@@ -51,7 +54,23 @@ fn main() {
         .add_state::<GameState>()
         .add_loading_state(LoadingState::new(GameState::Loading).continue_to_state(GameState::Next))
         .add_collection_to_loading_state::<_, PlayerAssets>(GameState::Loading)
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Game".into(),
+                        present_mode: PresentMode::AutoVsync,
+                        canvas: Some("#game".to_string()),
+                        fit_canvas_to_parent: true,
+                        prevent_default_event_handling: false,
+                        mode: WindowMode::Windowed,
+                        focused: true,
+                        ..default()
+                    }),
+                    ..default()
+                }),
+        )
         .add_plugins(PixelCameraPlugin)
         .add_systems(OnEnter(GameState::Next), setup)
         .add_systems(
@@ -71,7 +90,7 @@ fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
         transform: Transform {
             translation: Vec3::new(0., 0., 0.),
             ..Default::default()
-        }, // the SpriteSheet Bundle gives the `Transform` component, that's why we can use it in line 94
+        }, // the SpriteSheet Bundle gives the `Transform` component, that's why we can use it in line 113
         sprite: TextureAtlasSprite::new(0), // `sprite` here is the default image to show while not playing an animation.
         texture_atlas: assets.animations.clone(),
         ..Default::default()
