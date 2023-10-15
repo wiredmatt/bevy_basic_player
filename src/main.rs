@@ -51,6 +51,10 @@ fn main() {
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(PixelCameraPlugin)
         .add_systems(OnEnter(GameState::Next), setup)
+        .add_systems(
+            Update,
+            handle_movement_input.run_if(in_state(GameState::Next)),
+        )
         .run();
 }
 
@@ -79,4 +83,44 @@ fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
         transform: Transform::from_translation(Vec3::new(0., -15., 0.)),
         ..default()
     });
+}
+
+fn handle_movement_input(
+    time: Res<Time>,
+    input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut Transform, &mut Player), With<Player>>,
+) {
+    let (mut player_position, mut player_state) = query.single_mut();
+
+    let mut speed = 0.;
+
+    let base_speed = 50. * time.delta_seconds();
+
+    let bonus_speed = if input.pressed(KeyCode::ShiftLeft) {
+        60. * time.delta_seconds()
+    } else {
+        0.
+    };
+
+    if input.pressed(KeyCode::Right) {
+        player_state.facing = Direction::Right;
+        speed = base_speed + bonus_speed;
+    } else if input.pressed(KeyCode::Left) {
+        player_state.facing = Direction::Left;
+        speed = -(base_speed + bonus_speed);
+    }
+
+    if speed != 0. {
+        // NOTE: assigning these in this exact order will ensure the animation starts playing just before the character moves, otherwise you'll get a weird look
+
+        player_state.state = if bonus_speed != 0. {
+            PlayerState::Run
+        } else {
+            PlayerState::Walk
+        };
+
+        player_position.translation.x += speed;
+    } else {
+        player_state.state = PlayerState::Idle;
+    }
 }
