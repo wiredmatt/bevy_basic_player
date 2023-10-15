@@ -48,7 +48,7 @@ fn main() {
         .add_state::<GameState>()
         .add_loading_state(LoadingState::new(GameState::Loading).continue_to_state(GameState::Next))
         .add_collection_to_loading_state::<_, PlayerAssets>(GameState::Loading)
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(PixelCameraPlugin)
         .add_systems(OnEnter(GameState::Next), setup)
         .run();
