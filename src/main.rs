@@ -2,6 +2,9 @@ use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_pixel_camera::{PixelCameraBundle, PixelCameraPlugin};
 
+#[derive(Component)]
+struct AnimationTimer(Timer);
+
 #[derive(AssetCollection, Resource)]
 pub struct PlayerAssets {
     #[asset(texture_atlas(
@@ -53,7 +56,7 @@ fn main() {
         .add_systems(OnEnter(GameState::Next), setup)
         .add_systems(
             Update,
-            handle_movement_input.run_if(in_state(GameState::Next)),
+            (animate, handle_movement_input).run_if(in_state(GameState::Next)),
         )
         .run();
 }
@@ -72,7 +75,7 @@ fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
         sprite: TextureAtlasSprite::new(0), // `sprite` here is the default image to show while not playing an animation.
         texture_atlas: assets.animations.clone(),
         ..Default::default()
-    }));
+    }, AnimationTimer(Timer::from_seconds(0.15, TimerMode::Repeating))));
 
     commands.spawn(SpriteBundle {
         sprite: Sprite {
@@ -122,5 +125,36 @@ fn handle_movement_input(
         player_position.translation.x += speed;
     } else {
         player_state.state = PlayerState::Idle;
+    }
+}
+
+fn animate(
+    time: Res<Time>,
+    mut query: Query<(&Player, &mut AnimationTimer, &mut TextureAtlasSprite), With<Player>>,
+) {
+    let (player, mut timer, mut sprite) = query.single_mut();
+
+    match player.facing {
+        Direction::Left => {
+            sprite.flip_x = true;
+        }
+        Direction::Right => {
+            sprite.flip_x = false;
+        }
+    } // flip the sprite first to avoid a moonwalk effect
+
+    timer.0.tick(time.delta());
+    if timer.0.finished() {
+        match player.state {
+            PlayerState::Idle => {
+                sprite.index = (sprite.index + 1) % 10; // Idle animation goes from frame 0 to 10, check spritesheet
+            }
+            PlayerState::Walk => {
+                sprite.index = 10 + (sprite.index + 1) % 8; // Walk animation goes from frame 10 to 18
+            }
+            PlayerState::Run => {
+                sprite.index = 50 + (sprite.index + 1) % 8; // Run animation goes from frame 50 to 58
+            }
+        }
     }
 }
