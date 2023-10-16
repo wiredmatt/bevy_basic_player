@@ -81,7 +81,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, assets: Res<PlayerAssets>) {
-    commands.spawn(PixelCameraBundle::from_resolution(320, 240, true));
+    commands.spawn(PixelCameraBundle::from_resolution(320, 240, false));
 
     commands.spawn((Player {
         state: PlayerState::Idle,
